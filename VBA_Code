@@ -1,0 +1,110 @@
+Sub ticker():
+' The section starts with the loop between the sheets
+' -------------------------------------------------------------------------------------------------------------------
+
+For w = 1 To 6
+Worksheets(w).Activate
+
+' -------------------------------------------------------------------------------------------------------------------
+' Introduction of the parameters for the whole workbook
+
+    Dim LR As Integer
+    Dim num As Integer
+    Dim Vol As Double
+' -------------------------------------------------------------------------------------------------------------------
+' Introducing the headers for different cell data
+
+    Dim Header(1 To 8) As Variant
+    Header(1) = "Ticker"
+    Header(2) = "Yearly Change"
+    Header(3) = "Percent Change"
+    Header(4) = "Total Stock Volume"
+    Header(5) = "Greatest % Increase"
+    Header(6) = "Greatest % Decrease"
+    Header(7) = "Greatest Total Volume"
+    Header(8) = "Value"
+    
+' ------------------------------------------------------------------------------------------------------------------
+' A loop to append the name of the headders and make the cells Auto fit
+
+For k = 1 To 4
+    Cells(1, k + 8) = Header(k)
+    Columns(k + 8).AutoFit
+Next k
+
+For j = 2 To 4
+Cells(j, 15) = Header(j + 3)
+Columns(15).AutoFit
+Next j
+
+' ------------------------------------------------------------------------------------------------------------------
+' Determining the initial values for some of the cells
+
+Vol = 0
+Open_Vol = Cells(2, 3).Value
+num = 1
+
+' ------------------------------------------------------------------------------------------------------------------
+' Using the code to calculate the length of the data column
+
+LR = Cells(Rows.Count, 1).End(xlUp).Row
+
+' ------------------------------------------------------------------------------------------------------------------
+' The main loop that finds the "Yearly Change", "Percent Change" and "Total Stock Volume"
+
+For i = 2 To LR
+    
+If Cells(i + 1, 1).Value = Cells(i, 1).Value Then
+    Cells(num + 1, 9).Value = Cells(i, 1).Value
+         
+     Vol = Vol + Cells(i, 7).Value
+End If
+
+If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+    
+    Cells(num + 2, 9).Value = Cells(i + 1, 1).Value
+    Close_Vol = Cells(i, 6).Value
+    Cells(num + 1, 10).Value = Close_Vol - Open_Vol
+    Cells(num + 1, 11) = FormatPercent((Close_Vol - Open_Vol) / Open_Vol)
+    Cells(num + 1, 12).Value = Vol + Cells(i, 7).Value
+
+' ------------------------------------------------------------------------------------------------------------------
+' The Format change option for the color of the cells
+
+    If Cells(num + 1, 10).Value < 0 Then Cells(num + 1, 10).Interior.ColorIndex = 3
+    If Cells(num + 1, 10).Value > 0 Then Cells(num + 1, 10).Interior.ColorIndex = 4
+    Open_Vol = Cells(i + 1, 3)
+    num = num + 1
+    Vol = Vol + Cells(i, 7).Value
+    Vol = 0
+    End If
+Next i
+
+' ------------------------------------------------------------------------------------------------------------------
+' This section is related to the Bonus part to find the minimum and maximum changes
+
+Cells(1, 16) = Header(1)
+Cells(1, 17) = Header(8)
+Cells(2, 17).Value = FormatPercent(Application.WorksheetFunction.Max(Range("k:k")))
+Cells(3, 17).Value = FormatPercent(Application.WorksheetFunction.Min(Range("k:k")))
+Cells(4, 17).Value = Application.WorksheetFunction.Max(Range("l:l"))
+
+For m = 2 To LR
+
+If Cells(m, 11).Value = Cells(2, 17).Value Then
+Cells(2, 16).Value = Cells(m, 9).Value
+End If
+
+If Cells(m, 11).Value = Cells(3, 17).Value Then
+Cells(3, 16).Value = Cells(m, 9).Value
+End If
+If Cells(m, 12).Value = Cells(4, 17).Value Then
+Cells(4, 16).Value = Cells(m, 9).Value
+End If
+
+Next m
+
+' ------------------------------------------------------------------------------------------------------------------
+' Changing to the next sheet
+Next w
+End Sub
